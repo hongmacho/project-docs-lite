@@ -49,8 +49,9 @@ export function MarkdownEditor({ initialContent = '', onSave, readOnly = false }
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            code({ node, inline, className, children, ...props }) {
+            code({ className, children, ...props }: any) {
               const match = /language-(\w+)/.exec(className || '')
+              const inline = !match
               if (!inline && match) {
                 return (
                   <SyntaxHighlighter
@@ -107,8 +108,10 @@ export function MarkdownEditor({ initialContent = '', onSave, readOnly = false }
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                code({ node, inline, className, children, ...props }) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                code({ className, children, ...props }: any) {
                   const match = /language-(\w+)/.exec(className || '')
+                  const inline = !match
                   if (!inline && match) {
                     return (
                       <SyntaxHighlighter

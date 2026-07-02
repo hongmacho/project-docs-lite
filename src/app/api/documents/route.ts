@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { documentRepository } from '@/db/repository'
-import { v4 as uuid } from 'uuid'
 
 export async function GET() {
   try {

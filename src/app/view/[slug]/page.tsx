@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MarkdownEditor } from '@/components/MarkdownEditor'
-import { documentRepository } from '@/db/repository'
 import { type Document } from '@/types'
 import { Button } from '@/components/ui/button'
 
@@ -20,10 +19,11 @@ export default function ViewPage({ params }: ViewPageProps) {
     async function loadDocument() {
       try {
         const { slug } = await params
-        const doc = await documentRepository.findBySlug(slug)
-        if (doc) {
-          setDocument(doc)
-          await documentRepository.incrementViewCount(doc.id)
+        const res = await fetch(`/api/documents-by-slug?slug=${slug}`)
+        const data = await res.json()
+        if (data.data) {
+          setDocument(data.data)
+          await fetch(`/api/view-count/${data.data.id}`, { method: 'POST' })
         }
       } catch (error) {
         console.error('Load error:', error)
@@ -45,7 +45,6 @@ export default function ViewPage({ params }: ViewPageProps) {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Header */}
       <div className="border-b border-gray-300 dark:border-gray-600 p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">{document.title}</h1>
         <div className="flex gap-2">
@@ -58,7 +57,6 @@ export default function ViewPage({ params }: ViewPageProps) {
         </div>
       </div>
 
-      {/* Viewer */}
       <div className="flex-1 overflow-y-auto p-8">
         <MarkdownEditor initialContent={document.content} readOnly={true} />
       </div>

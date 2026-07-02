@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MarkdownEditor } from '@/components/MarkdownEditor'
-import { documentRepository } from '@/db/repository'
 import { type Document } from '@/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -14,7 +13,6 @@ interface EditorPageProps {
 
 export default function EditorPage({ params }: EditorPageProps) {
   const router = useRouter()
-  const [slug, setSlug] = useState<string>('')
   const [document, setDocument] = useState<Document | null>(null)
   const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
@@ -23,14 +21,13 @@ export default function EditorPage({ params }: EditorPageProps) {
   useEffect(() => {
     async function loadDocument() {
       try {
-        const { slug: slugParam } = await params
-        setSlug(slugParam)
-
-        const doc = await documentRepository.findBySlug(slugParam)
-        if (doc) {
-          setDocument(doc)
-          setTitle(doc.title)
-          setIsPublic(doc.isPublic)
+        const { slug } = await params
+        const res = await fetch(`/api/documents-by-slug?slug=${slug}`)
+        const data = await res.json()
+        if (data.data) {
+          setDocument(data.data)
+          setTitle(data.data.title)
+          setIsPublic(data.data.isPublic)
         }
       } catch (error) {
         console.error('Load error:', error)
@@ -67,7 +64,6 @@ export default function EditorPage({ params }: EditorPageProps) {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* Header */}
       <div className="border-b border-gray-300 dark:border-gray-600 p-4 space-y-3">
         <div className="flex gap-2">
           <Input
@@ -89,7 +85,6 @@ export default function EditorPage({ params }: EditorPageProps) {
         </div>
       </div>
 
-      {/* Editor */}
       <div className="flex-1 overflow-hidden">
         <MarkdownEditor
           initialContent={document.content}
