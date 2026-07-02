@@ -2,7 +2,7 @@ import 'server-only'
 
 import { db } from './index'
 import { documents, documentVersions, backlinks, searchHistory } from './schema'
-import { eq, like, desc } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 import { type Document, type NewDocument, type DocumentVersion, type NewDocumentVersion } from './schema'
 
 // Document Repository
@@ -18,15 +18,15 @@ export const documentRepository = {
   },
 
   async findById(id: number): Promise<Document | null> {
-    return db.query.documents.findFirst({ where: eq(documents.id, id) })
+    return (db.query.documents.findFirst({ where: eq(documents.id, id) }) || null) as Document | null
   },
 
   async findBySlug(slug: string): Promise<Document | null> {
-    return db.query.documents.findFirst({ where: eq(documents.slug, slug) })
+    return (db.query.documents.findFirst({ where: eq(documents.slug, slug) }) || null) as Document | null
   },
 
   async findByParent(parentId: number): Promise<Document[]> {
-    return db.query.documents.findMany({ where: eq(documents.parentId, parentId) })
+    return (db.query.documents.findMany({ where: eq(documents.parentId, parentId) }) || []) as Document[]
   },
 
   async update(id: number, data: Partial<NewDocument>): Promise<Document> {
@@ -67,11 +67,11 @@ export const documentVersionRepository = {
     })
   },
 
-  async findByTimestamp(documentId: number, timestamp: number): Promise<DocumentVersion | null> {
-    return db.query.documentVersions.findFirst({
+  async findByTimestamp(documentId: number): Promise<DocumentVersion | null> {
+    return (db.query.documentVersions.findFirst({
       where: eq(documentVersions.documentId, documentId),
       orderBy: [desc(documentVersions.changedAt)]
-    })
+    }) || null) as DocumentVersion | null
   }
 }
 
